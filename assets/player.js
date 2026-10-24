@@ -34,15 +34,25 @@
   });
 
   // Lleva la pantalla al video para que no tengan que desplazarse.
-  // Lo centra, así arriba sigue viéndose el nombre de la pareja.
+  // Siempre deja el video arriba, con una franja de la foto y el nombre
+  // de la pareja visibles, sin importar si el video es cuadrado u horizontal.
   var userScrolled = false;
   window.addEventListener("touchstart", function () { userScrolled = true; }, { once: true, passive: true });
   window.addEventListener("wheel", function () { userScrolled = true; }, { once: true, passive: true });
   function focusVideo() {
     if (userScrolled) return;
+    var vh = window.innerHeight;
     var rect = video.getBoundingClientRect();
-    var fits = rect.top >= 0 && rect.bottom <= window.innerHeight;
-    if (!fits) video.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Deja el video centrado si cabe; si es corto (horizontal), lo sube igual
+    // que en los demás, dejando ~22% de la pantalla para el encabezado.
+    var topGap = Math.min(Math.max((vh - rect.height) / 2, 0), vh * 0.22);
+    var target = window.scrollY + rect.top - topGap;
+    if (target <= 0) return;
+    // Si la página no es lo bastante alta para desplazarse, agrega espacio abajo.
+    var doc = document.documentElement;
+    var missing = target + vh - doc.scrollHeight;
+    if (missing > 0) document.body.style.paddingBottom = Math.ceil(missing) + "px";
+    window.scrollTo({ top: target, behavior: "smooth" });
   }
   if (video.readyState >= 1) setTimeout(focusVideo, 700);
   else video.addEventListener("loadedmetadata", function () { setTimeout(focusVideo, 700); }, { once: true });
