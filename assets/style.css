@@ -112,7 +112,7 @@ main {
 .video-card video {
   display: block;
   width: 100%;
-  max-height: 82vh;
+  max-height: 75vh;
   background: #000;
 }
 
